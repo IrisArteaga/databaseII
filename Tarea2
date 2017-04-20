@@ -1,0 +1,262 @@
+-- Tarea 2: BASES DE DATOS
+
+--IRIS YESENIA ARTEAGA ALVARADO
+
+-- Consultas en la Base de datos DellStore
+
+-- Problema 1
+-- Mostrar todos los productos de cada Categoría 
+
+SELECT
+products.title, 
+products.category,
+categoryname
+FROM 
+products
+INNER JOIN categories ON products.category = categories.category 
+ORDER BY
+categoryname;
+
+
+
+----------------------------------------------------------
+
+-- Problema 2
+-- Muestre todos los productos de la categoría Action
+
+SELECT
+products.prod_id, 
+products.title,
+categoryname
+FROM 
+products
+INNER JOIN categories ON products.category = categories.category
+WHERE 
+categoryname = 'Action';
+
+ 
+--------------------------------------------------------
+
+--Problema 3
+--¿Cuántos productos hay por categoría?
+
+SELECT 
+categories.categoryname,
+COUNT (prod_id)
+FROM 
+categories,products
+WHERE
+categories.category = products.category
+GROUP BY
+categories.categoryname;
+
+
+--OTRA FORMA--------
+
+SELECT 
+categories.categoryname, categories.category,
+COUNT (prod_id)
+FROM 
+categories,products
+WHERE
+categories.category = products.category
+GROUP BY
+categories.categoryname,categories.category;
+
+
+-----------------------------------------
+
+--Problema 4: ¿Cuántos  productos  hay  por  cada  categoría?  Ordenelos  de  mayor  cantidad  de productos a menor cantidad de los mismos.
+
+
+SELECT A.categoryname, count(*) FROM categories A
+INNER JOIN products B ON A.category = B.category
+GROUP BY A.categoryname
+ORDER BY 
+count(*) ASC;
+
+--OTRA FORMA-------------
+
+SELECT 
+category,
+COUNT (prod_id)
+FROM
+products
+GROUP BY
+category
+ORDER BY 
+COUNT (prod_id) ASC;
+
+--------------------------------------------
+
+- Problema 5. Muestre la categoría que tiene mayor cantidad de productos.
+
+
+SELECT A.categoryname, count(*) FROM categories A
+INNER JOIN products B ON A.category = B.category
+GROUP BY A.categoryname
+ORDER BY 
+count(*) DESC LIMIT 1;
+
+
+-----------------------------------------------
+
+
+--Problema 6. Muestre la edad promedio de los c
+lientes según sexo.
+
+SELECT 
+gender,
+AVG(age)
+FROM 
+customers
+GROUP BY
+gender;
+
+--------------------------------------------
+
+
+--Problema 7. Muestre  la  edad  promedio  de los  clientes  según  sexo.  En  su  resultado  reemplace 
+las letras M y F por Chicos y Chicas respectivamente.
+
+SELECT 
+gender,
+AVG(age)
+INTO prob6
+FROM 
+customers
+GROUP BY
+gender;
+
+
+SELECT 
+avg promedio,
+replace(gender, 'F', 'Chicas') 
+INTO prob7a
+FROM 
+prob6
+WHERE
+gender = 'F';
+
+SELECT 
+avg promedio,
+replace(gender, 'M', 'Chicos') 
+INTO prob7b
+FROM 
+prob6
+WHERE
+gender = 'M';
+
+SELECT *
+FROM 
+prob7a
+UNION
+SELECT *
+FROM
+prob7b;
+
+
+------------------------------------------------------------------------
+
+--Problema 8. ¿Cuantos clientes tienen en su nombre una V? (ejemplo: daVid)
+
+
+SELECT COUNT (*), 
+firstname
+FROM 
+customers
+GROUP BY 
+firstname
+HAVING firstname LIKE '%V%';
+
+
+ 
+--------------------------------------------------------
+
+Problema 9.
+
+¿Quienes compraron las 5 ordenes con mayor
+cantidad de productos?
+
+
+SELECT  
+ orders.orderid,
+ customerid,
+ SUM(quantity)  Cantidad
+FROM 
+ orderlines, orders 
+WHERE 
+ orders.orderid = orderlines.orderid
+GROUP BY
+ orders.orderid
+ORDER BY 
+ SUM(quantity) DESC LIMIT 5;
+
+---------------------------------------------------- 
+Problema 10
+¿Quienes compraron las 5 ordenes con mayor cantidad de productos distintos?
+
+SELECT  
+ orders.orderid,
+ customerid,
+ COUNT (prod_id) cantidad_prod
+FROM 
+ orderlines, orders 
+WHERE 
+ orders.orderid = orderlines.orderid
+GROUP BY
+ orders.orderid
+ORDER BY 
+ COUNT (prod_id) DESC LIMIT 5;
+------------------------------------------------------
+
+Problema 11
+¿Qué estado tiene la orden promedio mas cara?
+
+SELECT 
+state Estado,
+AVG(totalamount)  Total
+FROM 
+customers, orders
+WHERE 
+customers.customerid = orders.customerid
+GROUP BY
+state
+ORDER BY
+AVG(totalamount) DESC LIMIT 1;
+ 
+
+Problema 12 
+
+¿Indique  el  precio  de  orden  promedio  por  cada  estado  y  además  indique  la desviación estándar?
+
+
+SELECT 
+state Estado,
+AVG(totalamount)  Promedio_Total,
+STDDEV(totalamount)  desviacion_Estandar
+FROM 
+customers, orders
+WHERE 
+customers.customerid = orders.customerid
+GROUP BY
+state
+ORDER BY
+AVG(totalamount);
+
+
+
+--------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
