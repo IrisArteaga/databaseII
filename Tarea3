@@ -1,0 +1,240 @@
+    Tarea 3.     Practica sobre el Uso de PL/R y acceso a    					    	PostgreSQL desde R.
+
+                Iris Yesenia Arteaga Alvarado.
+
+
+--1. FUNCION PARA CALCULAR EL MINIMO----------------
+
+create or replace function r_minimo(_float8) returns float as '
+min(arg1)
+' language 'plr';
+
+
+CREATE AGGREGATE minimo (
+sfunc = plr_array_accum,
+basetype = float8,
+stype = _float8,
+finalfunc = r_minimo    
+);
+
+select minimo(nota_mate) from notas;
+select minimo(nota_fisica) from notas;
+select minimo(nota_ingles) from notas;
+
+
+
+--2. FUNCION PARA CALCULAR EL MAXIMO---------------------
+
+create or replace function r_maximo(_float8) returns float as ' max(arg1)
+' language 'plr';
+
+CREATE AGGREGATE maximo (
+sfunc = plr_array_accum,
+basetype = float8,
+stype = _float8,
+finalfunc = r_maximo
+);
+
+select maximo(nota_mate) from notas;
+select maximo(nota_fisica) from notas;
+select maximo(nota_ingles) from notas;
+
+
+
+--3. FUNCION PARA CALCULAR LA MEDIA ---------------------
+
+create or replace function r_mean(_float8) returns float as ' mean(arg1)
+' language 'plr';
+
+CREATE AGGREGATE r_media (
+sfunc = plr_array_accum,
+basetype = float8,
+stype = _float8,
+finalfunc = r_mean
+);
+
+select r_media(nota_mate) from notas;
+select r_media(nota_fisica) from notas;
+select r_media(nota_ingles) from notas;
+
+
+
+--4. FUNCION PARA CALCULAR EL PRIMER CUARTIL ------------
+
+create or replace function r_primer_cuartil(_float8) returns float as '
+quantile(arg1, probs=0.25)
+' language 'plr';
+
+
+CREATE AGGREGATE primer_cuartil (
+sfunc = plr_array_accum,
+basetype = float8,
+stype = _float8,
+finalfunc = r_primer_cuartil    
+);
+
+
+select primer_cuartil(nota_mate) from notas;
+select primer_cuartil(nota_fisica) from notas;
+select primer_cuartil(nota_ingles) from notas;
+
+
+--5. FUNCION PARA CALCULAR EL TERCER CUARTIL ---------------
+
+create or replace function r_tercer_cuartil(_float8) returns float as '
+quantile(arg1, probs=0.75)
+' language 'plr';
+
+
+CREATE AGGREGATE tercer_cuartil (
+sfunc = plr_array_accum,
+basetype = float8,
+stype = _float8,
+finalfunc = r_tercer_cuartil    
+);
+
+
+select tercer_cuartil(nota_mate) from notas;
+select tercer_cuartil(nota_fisica) from notas;
+select tercer_cuartil(nota_ingles) from notas;
+
+
+-- 6. FUNCION PARA CALCULAR LA MEDIANA -----------------------
+
+create or replace function r_median(_float8) returns float as '
+median(arg1)
+' language 'plr';
+
+CREATE AGGREGATE median (
+sfunc = plr_array_accum,
+basetype = float8,
+stype = _float8,
+finalfunc = r_median
+);
+
+
+select median(nota_mate) from notas;
+select median(nota_ingles) from notas;
+select median(nota_fisica) from notas;
+
+
+
+--7. FUNCION PARA CALCULAR EL PERCENTIL 33
+
+create or replace function r_percentile(_float8) returns float as '
+quantile(arg1, probs=0.33)
+' language 'plr';
+
+CREATE AGGREGATE percentile (
+sfunc = plr_array_accum,
+basetype = float8,
+stype = _float8,
+finalfunc = r_percentile
+);
+
+
+select percentile(nota_mate) from notas;
+select percentile(nota_ingles) from notas;
+select percentile(nota_fisica) from notas;
+
+
+----- CALCULANDO FUNCIONES POR SECCIONES -------------------
+
+--MINIMO
+
+select seccion, minimo(nota_fisica) from notas group by seccion order by seccion;
+
+select seccion, minimo(nota_mate) from notas group by seccion order by seccion;
+
+select seccion, minimo(nota_ingles) from notas group by seccion order by seccion;
+
+
+
+--MAXIMO
+
+select seccion, maximo(nota_fisica) from notas group by seccion order by seccion;
+
+select seccion, maximo(nota_mate) from notas group by seccion order by seccion;
+
+select seccion, maximo(nota_ingles) from notas group by seccion order by seccion;
+
+
+--PRIMER CUANTIL 
+
+select seccion, primer_cuartil(nota_fisica) from notas group by seccion order by seccion;
+
+select seccion, primer_cuartil(nota_mate) from notas group by seccion order by seccion;
+
+select seccion, primer_cuartil(nota_ingles) from notas group by seccion order by seccion;
+
+
+
+--TERCER CUARTIL
+
+select seccion, tercer_cuartil(nota_fisica) from notas group by seccion order by seccion;
+
+select seccion, tercer_cuartil(nota_mate) from notas group by seccion order by seccion;
+
+select seccion, tercer_cuartil(nota_ingles) from notas group by seccion order by seccion;
+
+
+--MEDIANA
+
+select seccion, median(nota_fisica) from notas group by seccion order by seccion;
+
+select seccion, median(nota_mate) from notas group by seccion order by seccion;
+
+select seccion, median(nota_ingles) from notas group by seccion order by seccion;
+
+
+
+--PERCENTIL 33
+
+select seccion, percentile(nota_fisica) from notas group by seccion order by seccion;
+
+select seccion, percentile(nota_mate) from notas group by seccion order by seccion;
+
+select seccion, percentile(nota_ingles) from notas group by seccion order by seccion;
+
+
+---3. FUNCION WINDOW PARA CALCULAR EL COEFICIENTE DE CORRELACION-----------
+
+CREATE OR REPLACE
+FUNCTION r_cor(float8, float8)
+RETURNS float8 AS
+$BODY$
+  return(cor(farg1,farg2))
+$BODY$
+LANGUAGE plr WINDOW;
+
+--COEFICIENTE DE CORRELACION ENTRE LA NOTA DE MATEMATICAS Y   							FISICA---
+SELECT nota_mate, nota_fisica, r_cor(nota_mate,nota_fisica) OVER () FROM notas LIMIT 1; 
+
+--COEFICIENTE DE CORRELACION ENTRE LA NOTA DE MATEMATICAS E   							INGLES---
+SELECT nota_mate, nota_ingles, r_cor(nota_mate,nota_ingles) OVER () FROM notas LIMIT 1;
+
+--COEFICIENTE DE CORRELACION ENTRE LA NOTA DE INGLES Y   							FISICA---
+SELECT nota_ingles, nota_fisica, r_cor(nota_ingles,nota_fisica) OVER () FROM notas LIMIT 1;
+
+
+---4. Realizar una función de agregación en plr que calcule el p-valor para la prueba de hipótesis de Wilcoxon con un valor de mu=5 para las notas en mate, inglés y física. La función en R es wilcox.test. 
+
+create or replace function wilcoxon(_float8) returns float as '
+wilcox.test(arg1, mu=5)$p.value
+' language 'plr';
+
+
+CREATE AGGREGATE wilcox (
+sfunc = plr_array_accum,
+basetype = float8,
+stype = _float8,
+finalfunc = wilcoxon    
+);
+
+
+select wilcox(nota_mate) pvalorMate from notas; 
+
+select wilcox(nota_fisica) pvalorFisica from notas;
+
+select wilcox(nota_ingles) pvalorIngles from notas;
+
